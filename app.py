@@ -96,8 +96,25 @@ def review_transaction():
     
     return render_template('review.html', transaction=session['transaction_data'])
 
-@app.route('/transactions')
+@app.route('/transactions', methods=['GET', 'POST'])
 def transactions():
+    if request.method == 'POST':
+        transaction_id = request.form.get('transaction_id')
+        print(transaction_id)
+        print(request.form.get('business_name'))
+        if transaction_id:
+            try:
+                # Find the transaction object by ID
+                transaction = next((t for t in backend.database.get_all_transactions() if t.transaction_id == transaction_id), None)
+                if transaction:
+                    # Delete the transaction using BackendTop
+                    message = backend.delete_transaction(transaction)
+                    flash(message)
+                else:
+                    flash('Transaction not found.')
+            except Exception as e:
+                flash(f'Error deleting transaction: {str(e)}')
+
     transactions = backend.database.get_all_transactions()
     total_spending = backend.database.get_total_spending()
     return render_template('transactions.html', transactions=transactions, total_spending=total_spending)

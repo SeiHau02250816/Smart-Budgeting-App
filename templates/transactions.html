@@ -21,6 +21,8 @@
                                         <th>Business Name</th>
                                         <th>Amount</th>
                                         <th>Category</th>
+                                        <th>Transaction ID</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -30,6 +32,15 @@
                                             <td>{{ transaction.business_name }}</td>
                                             <td>${{ "%.2f"|format(transaction.amount) }}</td>
                                             <td>{{ transaction.category }}</td>
+                                            <td>{{ transaction.transaction_id }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ url_for('transactions') }}" style="display:inline;">
+                                                    <input type="hidden" name="transaction_id" value="{{ transaction.transaction_id }}">
+                                                    <button type="submit" style="border:none; background:none;">
+                                                        <img src="{{ url_for('static', filename='pics/delete-icon.png') }}" alt="Delete" width="20" height="20">
+                                                    </button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>

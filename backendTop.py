@@ -81,3 +81,17 @@ class BackendTop:
 
     def allowed_file(self, filename):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
+
+    def delete_transaction(self, transaction):
+        """
+        Delete a transaction using the database handler.
+
+        :param transaction: The Transaction object to delete.
+        :return: Success message or raises an exception if deletion fails.
+        """
+        transaction_id = transaction.transaction_id
+        success = self.database.delete_transaction(transaction_id)
+        if success:
+            return f"Transaction {transaction_id} deleted successfully."
+        else:
+            raise Exception(f"Transaction {transaction_id} could not be found or deleted.")

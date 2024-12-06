@@ -25,7 +25,8 @@ class Transaction:
         date: str,
         amount: float,
         business_name: str,
-        category: str
+        category: str,
+        transaction_id: Optional[str] = None
     ):
         """
         Initialize a Transaction object.
@@ -35,8 +36,9 @@ class Transaction:
             amount (float): Transaction amount in RM
             business_name (str): Name of the business
             category (str): Transaction category
+            transaction_id (Optional[str]): Unique transaction identifier
         """
-        self.transaction_id = self._generate_transaction_id()
+        self.transaction_id = transaction_id if transaction_id else self._generate_transaction_id()
         self._set_date(date)
         self._set_amount(amount)
         self.business_name = business_name.strip()

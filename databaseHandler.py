@@ -49,6 +49,7 @@ class ExcelDatabase:
             transactions = []
             for row in sheet.iter_rows(min_row=2, values_only=True):  # Assuming the first row is headers
                 transaction = Transaction(
+                    transaction_id=row[0],
                     date=row[1].strftime("%Y-%m-%d") if isinstance(row[1], datetime) else row[1],
                     amount=row[2],
                     business_name=row[3],
@@ -97,6 +98,8 @@ class ExcelDatabase:
 
         :return: List of Transaction objects.
         """
+        for txn in self.transactions:
+            print(txn)
         return self.transactions
 
     def get_total_spending(self):
@@ -109,6 +112,22 @@ class ExcelDatabase:
         for transaction in self.transactions:
             total += transaction.amount
         return total
+
+    def delete_transaction(self, transaction_id):
+        """
+        Delete a transaction from the 'Spent' sheet by transaction ID.
+
+        :param transaction_id: The ID of the transaction to delete.
+        """
+        if 'Spent' in self.workbook.sheetnames:
+            sheet = self.workbook['Spent']
+            for row in sheet.iter_rows(min_row=2):  # Ignore the first row: headers
+                if row[0].value == transaction_id:
+                    sheet.delete_rows(row[0].row, 1)
+                    self.transactions = [t for t in self.transactions if t.transaction_id != transaction_id]
+                    self.workbook.save(self.file_path)
+                    return True
+        return False
 
 if __name__ == "__main__":
     db = ExcelDatabase('database.xlsx')
