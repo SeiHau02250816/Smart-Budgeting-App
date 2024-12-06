@@ -1,0 +1,38 @@
+/* Custom styles */
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    margin-bottom: 2rem;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+    margin: 0.5rem 0;
+}
+
+/* Transaction table styles */
+.transaction-table {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.transaction-table th {
+    background-color: #343a40;
+    color: white;
+}
+
+/* Upload form styles */
+.upload-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
