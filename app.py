@@ -44,7 +44,7 @@ def upload():
                 
                 # Store transaction data in session for review
                 session['transaction_data'] = {
-                    'date': datetime.strptime(transaction.date, '%Y-%m-%d').date(),  
+                    'date': transaction.date,  
                     'business_name': transaction.business_name,
                     'amount': float(transaction.amount),
                     'category': transaction.category.value

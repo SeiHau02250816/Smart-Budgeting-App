@@ -49,8 +49,6 @@ class BackendTop:
         # Date should already be in YYYY-MM-DD format from the form
         date = transaction_data['date']
 
-        print(date)
-        
         return Transaction(
             date=date,  # Transaction class will handle date validation
             business_name=transaction_data['business_name'],
