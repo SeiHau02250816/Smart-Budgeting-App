@@ -98,8 +98,6 @@ class ExcelDatabase:
 
         :return: List of Transaction objects.
         """
-        for txn in self.transactions:
-            print(txn)
         return self.transactions
 
     def get_total_spending(self):

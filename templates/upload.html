@@ -17,18 +17,187 @@
                         {% endif %}
                     {% endwith %}
                     
-                    <form method="POST" enctype="multipart/form-data" class="upload-form">
-                        <div class="mb-3">
-                            <label for="receipt" class="form-label">Select Receipt Image</label>
-                            <input type="file" class="form-control" id="receipt" name="receipt" accept=".jpg,.jpeg,.png" required>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Upload and Process</button>
-                        </div>
+                    <form method="POST" action="/upload" id="actionForm" onsubmit="return false;">
+                        <input type="hidden" name="action" id="actionInput">
+                        <button type="button" class="btn btn-secondary w-100 mb-2" onclick="handleUploadClick()">Upload Image</button>
+                        <button type="button" class="btn btn-secondary w-100 mb-2" onclick="handleCameraClick()">Take a Photo Now</button>
+                        <button type="button" class="btn btn-secondary w-100" onclick="submitForm('manual_input')">Input Manually</button>
                     </form>
+
+                    <!-- Camera Section -->
+                    <div id="camera-section" style="display:none;">
+                        <div class="mb-3">
+                            <video id="video" class="w-100" playsinline autoplay></video>
+                            <canvas id="canvas" style="display:none;"></canvas>
+                            <img id="captured-image" class="w-100 mb-2" style="display:none;">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button id="capture-btn" class="btn btn-primary" onclick="capturePhoto()">Take Photo</button>
+                            <button id="retake-btn" class="btn btn-secondary" onclick="retakePhoto()" style="display:none;">Retake Photo</button>
+                            <button id="use-photo-btn" class="btn btn-success" onclick="usePhoto()" style="display:none;">Use Photo</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelCamera()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div id="upload-section" style="display:none;">
+                        <form method="POST" enctype="multipart/form-data" class="upload-form" id="fileUploadForm">
+                            <input type="hidden" name="action" value="upload">
+                            <div class="mb-3">
+                                <label for="receipt" class="form-label">Select Receipt Image</label>
+                                <input type="file" class="form-control" id="receipt" name="receipt" accept=".jpg,.jpeg,.png" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Upload and Process</button>
+                                <button type="button" class="btn btn-secondary" onclick="cancelUpload()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function submitForm(action) {
+        document.getElementById('actionInput').value = action;
+        console.log('Action set to:', action);
+        document.getElementById('actionForm').action = '/upload';
+        document.getElementById('actionForm').submit();
+    }
+
+    function handleUploadClick() {
+        document.getElementById('actionForm').style.display = 'none';
+        document.getElementById('upload-section').style.display = 'block';
+    }
+
+    function cancelUpload() {
+        document.getElementById('actionForm').style.display = 'block';
+        document.getElementById('upload-section').style.display = 'none';
+        document.getElementById('receipt').value = ''; // Clear the file input
+    }
+
+    // Camera handling functions
+    let stream = null;
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const capturedImage = document.getElementById('captured-image');
+
+    async function handleCameraClick() {
+        try {
+            document.getElementById('actionForm').style.display = 'none';
+            document.getElementById('camera-section').style.display = 'block';
+            
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',  // Prefer back camera on mobile
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                } 
+            });
+            video.srcObject = stream;
+        } catch (err) {
+            console.error('Error accessing camera:', err);
+            alert('Error accessing camera. Please make sure you have granted camera permissions.');
+            cancelCamera();
+        }
+    }
+
+    function capturePhoto() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        // Display captured image
+        capturedImage.src = canvas.toDataURL('image/jpeg');
+        capturedImage.style.display = 'block';
+        video.style.display = 'none';
+        
+        // Show/hide relevant buttons
+        document.getElementById('capture-btn').style.display = 'none';
+        document.getElementById('retake-btn').style.display = 'block';
+        document.getElementById('use-photo-btn').style.display = 'block';
+    }
+
+    function retakePhoto() {
+        // Show video again
+        video.style.display = 'block';
+        capturedImage.style.display = 'none';
+        
+        // Show/hide relevant buttons
+        document.getElementById('capture-btn').style.display = 'block';
+        document.getElementById('retake-btn').style.display = 'none';
+        document.getElementById('use-photo-btn').style.display = 'none';
+    }
+
+    async function usePhoto() {
+        // Convert canvas content to blob
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+        const file = new File([blob], 'receipt.jpg', { type: 'image/jpeg' });
+
+        // Create FormData and append the file
+        const formData = new FormData();
+        formData.append('action', 'upload');
+        formData.append('receipt', file);
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                const data = await response.text();
+                console.error('Error uploading photo:', data);
+                alert('Error uploading photo. Please try again.');
+            }
+        } catch (err) {
+            console.error('Error uploading photo:', err);
+            alert('Error uploading photo. Please try again.');
+        } finally {
+            cancelCamera();
+        }
+    }
+
+    function cancelCamera() {
+        // Stop the camera stream
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+
+        // Reset UI
+        video.srcObject = null;
+        video.style.display = 'block';
+        capturedImage.style.display = 'none';
+        document.getElementById('capture-btn').style.display = 'block';
+        document.getElementById('retake-btn').style.display = 'none';
+        document.getElementById('use-photo-btn').style.display = 'none';
+        
+        // Show main form
+        document.getElementById('actionForm').style.display = 'block';
+        document.getElementById('camera-section').style.display = 'none';
+    }
+
+    // Clean up when leaving the page
+    window.addEventListener('beforeunload', () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    });
+
+    // Add event listener for file upload form submission
+    document.getElementById('fileUploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('receipt');
+        if (!fileInput.files.length) {
+            alert('Please select a file first');
+            return;
+        }
+        this.submit();
+    });
+</script>
+
 {% endblock %}

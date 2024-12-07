@@ -8,7 +8,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Transactions</h2>
                     <div>
-                        <h4 class="mb-0">Total Spending: ${{ "%.2f"|format(total_spending) }}</h4>
+                        <h4 class="mb-0">Total Spending: RM{{ "%.2f"|format(total_spending) }}</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -21,7 +21,6 @@
                                         <th>Business Name</th>
                                         <th>Amount</th>
                                         <th>Category</th>
-                                        <th>Transaction ID</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -30,9 +29,8 @@
                                         <tr>
                                             <td>{{ transaction.date }}</td>
                                             <td>{{ transaction.business_name }}</td>
-                                            <td>${{ "%.2f"|format(transaction.amount) }}</td>
-                                            <td>{{ transaction.category }}</td>
-                                            <td>{{ transaction.transaction_id }}</td>
+                                            <td>RM{{ "%.2f"|format(transaction.amount) }}</td>
+                                            <td>{{ transaction.category.value }}</td>
                                             <td>
                                                 <form method="POST" action="{{ url_for('transactions') }}" style="display:inline;">
                                                     <input type="hidden" name="transaction_id" value="{{ transaction.transaction_id }}">
