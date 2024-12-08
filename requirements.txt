@@ -7,6 +7,7 @@ gunicorn==21.2.0
 python-dateutil==2.8.2
 
 # Image Processing
+numpy==1.23.5
 opencv-python==4.8.0.74
 Pillow==10.0.0
 
