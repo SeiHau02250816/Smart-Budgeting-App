@@ -6,26 +6,7 @@ from datetime import datetime
 import secrets
 
 app = Flask(__name__)
-
-# Generate a secure random key for the session
-# In production, you should store this in an environment variable
-if os.environ.get('FLASK_SECRET_KEY'):
-    app.secret_key = os.environ.get('FLASK_SECRET_KEY')
-else:
-    # Generate a random key if no environment variable is set
-    app.secret_key = secrets.token_hex(16)
-    print("Warning: Using a temporary secret key. In production, set FLASK_SECRET_KEY environment variable.")
-
 backend = BackendTop()
-
-# Configure upload folder
-if os.environ.get('AZURE_WEBAPP_NAME'):
-    # If running on Azure, use the temp folder
-    UPLOAD_FOLDER = '/tmp/uploads'
-else:
-    # Local development
-    UPLOAD_FOLDER = 'uploads'
-
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 if not os.path.exists(UPLOAD_FOLDER):
